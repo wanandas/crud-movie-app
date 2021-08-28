@@ -1,16 +1,16 @@
 import React from "react";
 import { Observer } from "mobx-react-lite";
-import { useMst } from "../models/Root";
+import { useStore } from "../models/Root";
 
 function Display() {
-  const { MovieStore } = useMst();
+  const { MovieStore } = useStore();
 
   return (
     <Observer>
       {() => (
         <>
           {MovieStore.movies.map((x) => {
-            return <h1 key={x.id}>{x.title}</h1>;
+            return <h1 key={x._id}>{x.title}</h1>;
           })}
         </>
       )}
