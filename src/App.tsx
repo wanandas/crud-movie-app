@@ -18,14 +18,9 @@ function App() {
           const { User } = useStore();
           return (
             <Router>
-              <Switch>
-                <Route path="/display">
-                  {User.authToken ? <Display /> : <Redirect to="/login" />}
-                </Route>
-                <Route exact path="/login">
-                  <LoginPage />
-                </Route>
-              </Switch>
+              {!User.authToken && <Redirect to="/login" />}
+              <Route path="/login" component={LoginPage} />
+              <Route path="/" component={Display} />
             </Router>
           );
         }}

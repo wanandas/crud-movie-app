@@ -5,7 +5,7 @@ import { User } from "./user/user";
 
 export type RootInstance = Instance<typeof RootModel>;
 
-const RootModel = types
+export const RootModel = types
   .model({
     MovieStore: MovieStore,
     User: User,
@@ -13,6 +13,9 @@ const RootModel = types
   .actions((self) => {
     return {
       afterCreate() {
+        if (localStorage.getItem("currentUser") !== null) {
+          self.User = JSON.parse(localStorage.getItem("currentUser") as string);
+        }
         if (self.User.authToken) {
           self.MovieStore.fetchMovie();
         }
