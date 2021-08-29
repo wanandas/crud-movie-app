@@ -6,19 +6,32 @@ import { DataTable } from "../Component/DataTable";
 import { Box } from "../uikits";
 import styled from "styled-components";
 import { Modal } from "../Component/Modal";
+import { useHistory } from "react-router-dom";
 
 function Display() {
   const { MovieStore, User } = useStore();
+  const hisory = useHistory();
 
   React.useEffect(() => {
     if (User.authToken) {
-      MovieStore.fetchMovie();
+      MovieStore.fetchMovies();
     }
   }, [User.authToken]);
 
   return (
     <DisplayContainer>
       <h1>Movie Detail</h1>
+      <LogoutContain>
+        <p
+          onClick={() => {
+            User.logout();
+            hisory.push("/login");
+          }}
+          style={{ cursor: "pointer" }}
+        >
+          log out{" "}
+        </p>
+      </LogoutContain>
       <DataTable />
       <Modal state="create" />
     </DisplayContainer>
@@ -27,6 +40,7 @@ function Display() {
 
 const DisplayContainer = styled(Box)`
   padding: 0 0 5%;
+  position: relative;
   flex-direction: column;
   margin: 10% auto;
   width: 100%;
@@ -36,6 +50,14 @@ const DisplayContainer = styled(Box)`
   @media (min-width: 768px) {
     width: 80%;
   }
+`;
+
+const LogoutContain = styled.div`
+  position: absolute;
+  top: 0;
+  right: 2%;
+  text-transform: uppercase;
+  font-size: 8px;
 `;
 
 export default Display;

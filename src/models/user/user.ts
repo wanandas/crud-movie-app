@@ -41,7 +41,6 @@ export const User = types
         return res;
       } catch (err) {
         console.error(err);
-        console.log(err);
         alert("wrong email or password");
       }
     }),
@@ -55,7 +54,7 @@ export const User = types
       role: string;
     }) {
       try {
-        yield axios.post(`${process.env.REACT_APP_API}/users/register`, {
+        yield axios.post(`/users/register`, {
           email,
           password,
           role: role,
@@ -64,4 +63,9 @@ export const User = types
         console.error(err);
       }
     }),
+    logout: () => {
+      localStorage.clear();
+      applySnapshot(self, {});
+      console.log(self);
+    },
   }));

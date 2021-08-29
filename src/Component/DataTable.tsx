@@ -9,7 +9,7 @@ export const DataTable = () => {
 
   React.useEffect(() => {
     if (User.authToken) {
-      MovieStore.fetchMovie();
+      MovieStore.fetchMovies();
     }
   }, [User.authToken]);
 
@@ -54,20 +54,24 @@ export const DataTable = () => {
 
                       <td>
                         <a>
-                          <Modal state="edit" />
+                          <Modal state="edit" id={value._id} />
                         </a>{" "}
                         /{" "}
                         <a
                           style={{ cursor: "pointer" }}
                           onClick={async () => {
-                            try {
-                              await MovieStore.deleteMovie({
-                                movieId: value._id,
-                                role: User.info?.role || "3",
-                              });
-                              MovieStore.fetchMovie();
-                            } catch (err) {
-                              console.error(err);
+                            if (User.info?.role === "MANAGER") {
+                              try {
+                                await MovieStore.deleteMovie({
+                                  movieId: value._id,
+                                  role: User.info.role,
+                                });
+                                MovieStore.fetchMovies();
+                              } catch (err) {
+                                console.error(err);
+                              }
+                            } else {
+                              alert("Only a MANAGER user can delete");
                             }
                           }}
                         >

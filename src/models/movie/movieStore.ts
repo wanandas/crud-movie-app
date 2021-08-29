@@ -16,7 +16,7 @@ export const MovieStore = types
     movies: types.optional(types.array(Movie), []),
   })
   .actions((self) => {
-    const fetchMovie = flow(function* fetchMovie() {
+    const fetchMovies = flow(function* fetchMovie() {
       try {
         self.loaded = true;
         const res = yield axios.get(`/movies`, {
@@ -31,6 +31,69 @@ export const MovieStore = types
       }
     });
 
+    const getMovie = flow(function* getMovie(id: string) {
+      try {
+        const res = yield axios.get(`/movie/${id}`, {
+          headers: {
+            "x-access-token": getParent<any>(self).User.authToken,
+          },
+        });
+        return res.data.movie;
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
+    const editMovie = flow(function* editMovie({
+      id,
+      title,
+      yearReleased,
+      rating,
+    }: {
+      id: string;
+      title: string;
+      yearReleased: string;
+      rating: string;
+    }) {
+      try {
+        yield axios.patch(
+          `/movie/${id}`,
+          { title, yearReleased: parseInt(yearReleased), rating },
+          {
+            headers: {
+              "x-access-token": getParent<any>(self).User.authToken,
+            },
+          }
+        );
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
+    const createMovie = flow(function* createMovie({
+      title,
+      yearReleased,
+      rating,
+    }: {
+      title: string;
+      yearReleased: string;
+      rating: string;
+    }) {
+      try {
+        yield axios.post(
+          `/movies`,
+          { title, yearReleased: parseInt(yearReleased), rating },
+          {
+            headers: {
+              "x-access-token": getParent<any>(self).User.authToken,
+            },
+          }
+        );
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
     const deleteMovie = flow(function* deleteMovie({
       movieId,
       role,
@@ -38,19 +101,26 @@ export const MovieStore = types
       movieId: string;
       role: string;
     }) {
-      try {
-        yield axios.delete(`/movie/${movieId}`, {
-          headers: {
-            "x-access-token": getParent<any>(self).User.authToken,
-          },
-        });
-      } catch (err) {
-        console.error(err);
+      if (role === "MANAGER") {
+        try {
+          yield axios.delete(`/movie/${movieId}`, {
+            headers: {
+              "x-access-token": getParent<any>(self).User.authToken,
+            },
+          });
+        } catch (err) {
+          console.error(err);
+        }
+      } else {
+        alert("for manager only");
       }
     });
 
     return {
-      fetchMovie,
+      fetchMovies,
       deleteMovie,
+      getMovie,
+      editMovie,
+      createMovie,
     };
   });

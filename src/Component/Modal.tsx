@@ -1,6 +1,7 @@
 import { Observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import { useStore } from "../models/Root";
 import { SelectOption } from "../pages/Login";
 import { Button } from "../uikits";
 
@@ -9,18 +10,20 @@ interface Props {
 }
 
 interface IMovie {
-  title?: string;
-  rating?: string;
-  yearReleased?: string;
+  title: string;
+  rating: string;
+  yearReleased: string;
 }
 
-export function Modal({ state }: { state: string }) {
+export function Modal({ state, id }: { state: string; id?: string }) {
   const [open, setOpen] = useState<boolean>(false);
   const [movie, setMovie] = useState<IMovie>({
     title: "",
     yearReleased: "",
     rating: "G",
   });
+
+  const { MovieStore } = useStore();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -30,7 +33,49 @@ export function Modal({ state }: { state: string }) {
     return setMovie((pre) => ({ ...pre, [name]: value }));
   };
 
-  const handleSubmit = () => {};
+  const handleSubmit = async () => {
+    if (movie.title && movie.yearReleased && movie.rating) {
+      if (id && state === "edit") {
+        try {
+          await MovieStore.editMovie({
+            id: id,
+            title: movie.title,
+            yearReleased: movie.yearReleased,
+            rating: movie.rating,
+          });
+          return await MovieStore.fetchMovies();
+        } catch (err) {
+          console.error(err);
+        }
+      } else if (state !== "edit") {
+        try {
+          await MovieStore.createMovie({
+            title: movie.title,
+            yearReleased: movie.yearReleased,
+            rating: movie.rating,
+          });
+          return await MovieStore.fetchMovies();
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    } else {
+      alert("need input data");
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      if (id && open) {
+        const res = await MovieStore.getMovie(id);
+        setMovie({
+          title: res.title,
+          yearReleased: res.yearReleased,
+          rating: res.rating,
+        });
+      }
+    })();
+  }, [open]);
 
   return (
     <Observer>
@@ -53,59 +98,47 @@ export function Modal({ state }: { state: string }) {
                 >
                   <h1>{state} Movie</h1>
                 </div>
-                <TextInputContainer>
-                  <TextInputLabel>TITLE :</TextInputLabel>
-                  <TextInput
-                    placeholder=""
-                    name="title"
-                    value={movie?.title}
-                    onChange={handleChange}
-                  />
-                </TextInputContainer>
+                <form onSubmit={handleSubmit}>
+                  <TextInputContainer>
+                    <TextInputLabel>TITLE :</TextInputLabel>
+                    <TextInput
+                      placeholder=""
+                      required
+                      name="title"
+                      value={movie?.title}
+                      onChange={handleChange}
+                    />
+                  </TextInputContainer>
 
-                <TextInputContainer>
-                  <TextInputLabel>Year Released :</TextInputLabel>
-                  <TextInput
-                    type="number"
-                    name="yearReleased"
-                    placeholder=""
-                    value={movie?.yearReleased}
-                    onChange={handleChange}
-                  />
-                </TextInputContainer>
-                <TextInputContainer>
-                  <TextInputLabel>Rating: </TextInputLabel>
-                  <SelectOption
-                    name="rating"
-                    onChange={handleChange}
-                    value={movie?.rating}
-                  >
-                    <option value="G">G</option>
-                    <option value="PG">PG</option>
-                    <option value="M">M</option>
-                    <option value="MA">MA</option>
-                    <option value="R">R</option>
-                  </SelectOption>
-                </TextInputContainer>
-                <div style={{ textAlign: "center", marginTop: "2rem" }}>
-                  <Button
-                    onClick={() => {
-                      if (
-                        movie?.yearReleased === undefined ||
-                        movie?.title === undefined ||
-                        movie?.yearReleased === "" ||
-                        movie?.title === ""
-                      ) {
-                        alert("need input data");
-                      } else {
-                        setMovie({ title: "", yearReleased: "", rating: "" });
-                        setOpen(!open);
-                      }
-                    }}
-                  >
-                    SAVE
-                  </Button>
-                </div>
+                  <TextInputContainer>
+                    <TextInputLabel>Year Released :</TextInputLabel>
+                    <TextInput
+                      type="number"
+                      required
+                      name="yearReleased"
+                      placeholder=""
+                      value={movie?.yearReleased}
+                      onChange={handleChange}
+                    />
+                  </TextInputContainer>
+                  <TextInputContainer>
+                    <TextInputLabel>Rating: </TextInputLabel>
+                    <SelectOption
+                      name="rating"
+                      onChange={handleChange}
+                      value={movie?.rating}
+                    >
+                      <option value="G">G</option>
+                      <option value="PG">PG</option>
+                      <option value="M">M</option>
+                      <option value="MA">MA</option>
+                      <option value="R">R</option>
+                    </SelectOption>
+                  </TextInputContainer>
+                  <div style={{ textAlign: "center", marginTop: "2rem" }}>
+                    <Button type="submit">SAVE</Button>
+                  </div>
+                </form>
               </ModalContent>
             </ModalContainer>
           </>

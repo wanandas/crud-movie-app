@@ -14,10 +14,14 @@ export const RootModel = types
     return {
       afterCreate() {
         if (localStorage.getItem("currentUser") !== null) {
-          self.User = JSON.parse(localStorage.getItem("currentUser") as string);
+          const current = JSON.parse(
+            localStorage.getItem("currentUser") as string
+          );
+          self.User.authToken = current.authToken;
+          self.User.info = { _id: current._id, role: current.role };
         }
         if (self.User.authToken) {
-          self.MovieStore.fetchMovie();
+          self.MovieStore.fetchMovies();
         }
       },
     };

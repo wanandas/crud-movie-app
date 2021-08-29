@@ -32,7 +32,7 @@ export const LoginPage = () => {
   const handleSubmit = async () => {
     if (mode === "login") {
       try {
-        const res = await User.login({
+        await User.login({
           email: user.email,
           password: user.password,
         });
@@ -40,15 +40,19 @@ export const LoginPage = () => {
       } catch (err) {
         alert(err.message);
       }
-    } else {
-      User.register({
-        email: user.email,
-        password: user.password,
-        role: user.role,
-      }).then(() => {
-        User.login({ email: user.email, password: user.password });
-        hisory.push("/display");
-      });
+    }
+    if (mode === "register") {
+      try {
+        await User.register({
+          email: user.email,
+          password: user.password,
+          role: user.role,
+        });
+        await User.login({ email: user.email, password: user.password });
+        if (User.authToken) hisory.push("/display");
+      } catch (err) {
+        alert(err.message);
+      }
     }
   };
 
@@ -56,7 +60,7 @@ export const LoginPage = () => {
     if (User.authToken) {
       hisory.push("/");
     }
-  }, [user]);
+  }, [user, User]);
 
   return (
     <LoginPageContainer>
