@@ -23,13 +23,10 @@ export const User = types
       password: string;
     }) {
       try {
-        const res = yield axios.post(
-          `${process.env.REACT_APP_API}/users/login`,
-          {
-            email,
-            password,
-          }
-        );
+        const res = yield axios.post(`/users/login`, {
+          email,
+          password,
+        });
 
         localStorage.setItem(
           "currentUser",
@@ -41,6 +38,28 @@ export const User = types
         );
         self.authToken = res.data.token;
         self.info = { _id: res.data._id, role: role[res.data.role - 1] };
+        return res;
+      } catch (err) {
+        console.error(err);
+        console.log(err);
+        alert("wrong email or password");
+      }
+    }),
+    register: flow(function* register({
+      email,
+      password,
+      role,
+    }: {
+      email: string;
+      password: string;
+      role: string;
+    }) {
+      try {
+        yield axios.post(`${process.env.REACT_APP_API}/users/register`, {
+          email,
+          password,
+          role: role,
+        });
       } catch (err) {
         console.error(err);
       }

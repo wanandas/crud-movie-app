@@ -19,7 +19,7 @@ export const MovieStore = types
     const fetchMovie = flow(function* fetchMovie() {
       try {
         self.loaded = true;
-        const res = yield axios.get(`${process.env.REACT_APP_API}/movies`, {
+        const res = yield axios.get(`/movies`, {
           headers: {
             "x-access-token": getParent<any>(self).User.authToken,
           },
@@ -31,7 +31,26 @@ export const MovieStore = types
       }
     });
 
+    const deleteMovie = flow(function* deleteMovie({
+      movieId,
+      role,
+    }: {
+      movieId: string;
+      role: string;
+    }) {
+      try {
+        yield axios.delete(`/movie/${movieId}`, {
+          headers: {
+            "x-access-token": getParent<any>(self).User.authToken,
+          },
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
     return {
       fetchMovie,
+      deleteMovie,
     };
   });
